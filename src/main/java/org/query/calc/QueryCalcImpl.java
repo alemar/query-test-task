@@ -1,7 +1,12 @@
 package org.query.calc;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class QueryCalcImpl implements QueryCalc {
     @Override
@@ -32,5 +37,37 @@ public class QueryCalcImpl implements QueryCalc {
         // Note: STABLE is not a standard SQL command. It means that you should preserve the original order. 
         // In this context it means, that in case of tie on s-value you should prefer value of a, with a lower row number.
         // In case multiple occurrences, you may assume that group has a row number of the first occurrence.
+
+
+        MainTable mainTable = new MainTable(t1);
+        mainTable.populate();
+
+        CartesianProductTable secondaryTable = new CartesianProductTable(new Table(t2), new Table(t3));
+        secondaryTable.populate();
+
+        List<Row> rows = mainTable.getRowsStream()
+                .map(row -> calculate(row, secondaryTable))
+                //TODO should be optimized - do not sort all rows, only the top 10 should be sorted
+                .sorted()
+                .limit(10)
+                .collect(Collectors.toList());
+
+        writeToFile(output, rows);
     }
+
+    private Row calculate(AccumulatedRow row, CartesianProductTable cartesianProduct) {
+        BigDecimal value = row.getAccumulatedValue().multiply(
+                cartesianProduct.getMultiplier(row.getKey())
+        );
+        return new Row(row.getKey(), value);
+    }
+
+    private void writeToFile(Path output, List<Row> rows) throws IOException {
+        FileWriter fileWriter = new FileWriter(output.toFile());
+        PrintWriter printWriter = new PrintWriter(fileWriter);
+        printWriter.println(rows.size());
+        rows.forEach(printWriter::println);
+        printWriter.close();
+    }
+
 }
