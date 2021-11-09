@@ -1,13 +1,12 @@
 package org.query.calc;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 
 class MainTable extends Table {
-    private final Map<BigDecimal, AccumulatedRow> rows = new LinkedHashMap<>();
+    private final Map<Double, AccumulatedRow> rows = new LinkedHashMap<>();
 
     public MainTable(Path path) throws IOException {
         super(path);
@@ -19,7 +18,7 @@ class MainTable extends Table {
     }
 
     @Override
-    protected void processLine(BigDecimal first, BigDecimal second) {
+    protected void processLine(double first, double second) {
         rows.computeIfAbsent(first, AccumulatedRow::new).accumulateValue(second);
     }
 

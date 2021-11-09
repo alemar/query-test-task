@@ -1,7 +1,6 @@
 package org.query.calc;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -9,8 +8,8 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CartesianProductTable {
-    private final TreeMap<BigDecimal, AccumulatedRow> rows = new TreeMap<>(Collections.reverseOrder());
-    BigDecimal accumulatedSum = BigDecimal.ZERO;
+    private final TreeMap<Double, AccumulatedRow> rows = new TreeMap<>(Collections.reverseOrder());
+    Double accumulatedSum = 0d;
 
     private Table table1;
     private Table table2;
@@ -20,7 +19,7 @@ public class CartesianProductTable {
         this.table2 = table2;
     }
 
-    public BigDecimal getMultiplier(BigDecimal key) {
+    public double getMultiplier(double key) {
         return Optional.ofNullable(rows.ceilingEntry(key))
                 .map(entry -> entry.getValue().getAccumulatedValue())
                 .orElse(accumulatedSum);
@@ -38,21 +37,21 @@ public class CartesianProductTable {
 //            });
 //        });
 
-        Map<BigDecimal, AccumulatedRow> map = new ConcurrentHashMap<>();
+        Map<Double, AccumulatedRow> map = new ConcurrentHashMap<>();
         //use parallel stream
         table1.getRows().stream().parallel().forEach(row1 -> {
             table2.getRows().forEach(row2 -> {
-                BigDecimal key = row1.getFirst().add(row2.getFirst());
-                BigDecimal value = row1.getSecond().multiply(row2.getSecond());
+                double key = row1.getFirst() + row2.getFirst();
+                double value = row1.getSecond() * row2.getSecond();
                 map.computeIfAbsent(key, AccumulatedRow::new).accumulateValue(value);
             });
         });
         rows.putAll(map);
 
         for (AccumulatedRow row : rows.values()) {
-            BigDecimal accumulatedValue = row.getAccumulatedValue();
+            double accumulatedValue = row.getAccumulatedValue();
             row.setAccumulatedValue(accumulatedSum);
-            accumulatedSum = accumulatedSum.add(accumulatedValue);
+            accumulatedSum += accumulatedValue;
         }
 
         table1 = null;

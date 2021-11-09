@@ -1,28 +1,26 @@
 package org.query.calc;
 
-import java.math.BigDecimal;
-
 class AccumulatedRow {
-    private final BigDecimal key;
-    private volatile BigDecimal accumulatedValue = BigDecimal.ZERO;
+    private final double key;
+    private volatile double accumulatedValue = 0;
 
-    public AccumulatedRow(BigDecimal key) {
+    public AccumulatedRow(double key) {
         this.key = key;
     }
 
-    public BigDecimal getKey() {
+    public double getKey() {
         return key;
     }
 
-    synchronized void accumulateValue(BigDecimal value) {
-        accumulatedValue = accumulatedValue.add(value);
+    synchronized void accumulateValue(double value) {
+        accumulatedValue += value;
     }
 
-    BigDecimal getAccumulatedValue() {
+    double getAccumulatedValue() {
         return accumulatedValue;
     }
 
-    void setAccumulatedValue(BigDecimal accumulatedValue) {
+    void setAccumulatedValue(double accumulatedValue) {
         this.accumulatedValue = accumulatedValue;
     }
 }

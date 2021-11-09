@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ class Table {
         initRows(size);
         for (int i = 0; i < size; i++) {
             String[] split = reader.readLine().split(DELIMITER);
-            processLine(new BigDecimal(split[0]), new BigDecimal(split[1]));
+            processLine(Double.parseDouble(split[0]), Double.parseDouble(split[1]));
         }
         reader.close();
     }
@@ -32,7 +31,7 @@ class Table {
         rows = new ArrayList<>(size);
     }
 
-    protected void processLine(BigDecimal first, BigDecimal second) {
+    protected void processLine(double first, double second) {
         rows.add(new Row(first, second));
     }
 

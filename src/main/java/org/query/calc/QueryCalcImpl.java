@@ -3,7 +3,6 @@ package org.query.calc;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,9 +55,7 @@ public class QueryCalcImpl implements QueryCalc {
     }
 
     private Row calculate(AccumulatedRow row, CartesianProductTable cartesianProduct) {
-        BigDecimal value = row.getAccumulatedValue().multiply(
-                cartesianProduct.getMultiplier(row.getKey())
-        );
+        double value = row.getAccumulatedValue() * cartesianProduct.getMultiplier(row.getKey());
         return new Row(row.getKey(), value);
     }
 
