@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class QueryCalcImpl implements QueryCalc {
@@ -37,15 +38,16 @@ public class QueryCalcImpl implements QueryCalc {
         // In this context it means, that in case of tie on s-value you should prefer value of a, with a lower row number.
         // In case multiple occurrences, you may assume that group has a row number of the first occurrence.
 
-
         MainTable mainTable = new MainTable(t1);
         mainTable.populate();
 
         CartesianProductTable secondaryTable = new CartesianProductTable(new Table(t2), new Table(t3));
         secondaryTable.populate();
 
+        Map<Double, Row> groupedRows = secondaryTable.groupByLevels(mainTable.getKeys());
+
         List<Row> rows = mainTable.getRowsStream()
-                .map(row -> calculate(row, secondaryTable))
+                .map(row -> calculate(row, groupedRows))
                 //TODO should be optimized - do not sort all rows, only the top 10 should be sorted
                 .sorted()
                 .limit(10)
@@ -54,9 +56,10 @@ public class QueryCalcImpl implements QueryCalc {
         writeToFile(output, rows);
     }
 
-    private Row calculate(AccumulatedRow row, CartesianProductTable cartesianProduct) {
-        double value = row.getAccumulatedValue() * cartesianProduct.getMultiplier(row.getKey());
-        return new Row(row.getKey(), value);
+    private Row calculate(Row row, Map<Double, Row> groupedRows) {
+        double a = row.getKey();
+        double s = row.getAccumulatedValue() * groupedRows.get(a).getAccumulatedValue();
+        return new Row(a, s);
     }
 
     private void writeToFile(Path output, List<Row> rows) throws IOException {

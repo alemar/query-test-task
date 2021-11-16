@@ -5,19 +5,20 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 class Table {
-    private final BufferedReader reader;
     private static final String DELIMITER = " ";
-    private List<Row> rows;
+    private final BufferedReader reader;
+    protected Map<Double, Row> rows;
 
     Table(Path path) throws IOException {
         reader = getReader(path);
     }
 
-    void populate() throws IOException {
+    protected void populate() throws IOException {
         int size = readSize(reader);
         initRows(size);
         for (int i = 0; i < size; i++) {
@@ -28,14 +29,20 @@ class Table {
     }
 
     protected void initRows(int size){
-        rows = new ArrayList<>(size);
+        rows = new HashMap<>(size);
     }
 
-    protected void processLine(double first, double second) {
-        rows.add(new Row(first, second));
+    protected void processLine(double key, double value) {
+        Row row = rows.get(key);
+        if (row == null) {
+            row = new Row(key, value);
+            rows.put(key, row);
+        } else {
+            row.accumulateValue(value);
+        }
     }
 
-    protected List<Row> getRows() {
+    protected Map<Double, Row> getRows() {
         return rows;
     }
 

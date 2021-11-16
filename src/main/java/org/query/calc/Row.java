@@ -1,30 +1,41 @@
 package org.query.calc;
 
+class Row implements Comparable<Row> {
+    private final double key;
+    private volatile double accumulatedValue = 0;
 
-public class Row implements Comparable<Row> {
-    private final double first;
-    private final double second;
-
-    public Row(double first, double second) {
-        this.first = first;
-        this.second = second;
+    public Row(double key) {
+        this.key = key;
     }
 
-    public double getFirst() {
-        return first;
+    public Row(double key, double accumulatedValue) {
+        this.key = key;
+        this.accumulatedValue = accumulatedValue;
     }
 
-    public double getSecond() {
-        return second;
+    public double getKey() {
+        return key;
+    }
+
+    synchronized void accumulateValue(double value) {
+        accumulatedValue += value;
+    }
+
+    double getAccumulatedValue() {
+        return accumulatedValue;
+    }
+
+    void setAccumulatedValue(double accumulatedValue) {
+        this.accumulatedValue = accumulatedValue;
     }
 
     @Override
     public int compareTo(Row o) {
-        return Double.compare(o.getSecond(), second);
+        return Double.compare(o.getAccumulatedValue(), accumulatedValue);
     }
 
     @Override
     public String toString() {
-        return first + " " + second;
+        return key + " " + accumulatedValue;
     }
 }

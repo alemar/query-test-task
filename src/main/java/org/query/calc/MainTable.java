@@ -6,24 +6,36 @@ import java.util.*;
 import java.util.stream.Stream;
 
 class MainTable extends Table {
-    private final Map<Double, AccumulatedRow> rows = new LinkedHashMap<>();
+    int index = 0;
+    private double[] keys;
 
-    public MainTable(Path path) throws IOException {
+    MainTable(Path path) throws IOException {
         super(path);
     }
 
     @Override
     protected void initRows(int size) {
-        //do nothing
+        super.initRows(size);
+        keys = new double[size];
     }
 
     @Override
-    protected void processLine(double first, double second) {
-        rows.computeIfAbsent(first, AccumulatedRow::new).accumulateValue(second);
+    protected void populate() throws IOException {
+        super.populate();
+        keys = Arrays.stream(keys).distinct().toArray();
     }
 
-    public Stream<AccumulatedRow> getRowsStream() {
-        return rows.values().stream();
+    @Override
+    protected void processLine(double key, double value) {
+        super.processLine(key, value);
+        keys[index++] = key;
     }
 
+    Stream<Row> getRowsStream() {
+        return Arrays.stream(keys).mapToObj(rows::get);
+    }
+
+    public double[] getKeys() {
+        return keys;
+    }
 }
